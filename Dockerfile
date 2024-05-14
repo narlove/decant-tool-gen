@@ -5,6 +5,8 @@ RUN apt-get update; \
 
 COPY src ./src
 COPY CMakeLists.txt .
+COPY reqs ./reqs
+COPY target ./target
 
 RUN mkdir build
 
