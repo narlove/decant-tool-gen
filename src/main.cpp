@@ -6,6 +6,8 @@
 #include <vector>
 #include <stdlib.h>
 #include <cmath>
+#include <algorithm>
+#include <cstring>
 
 using std::invalid_argument;
 using std::malloc;
@@ -13,12 +15,16 @@ using std::unordered_map;
 using std::vector;
 using namespace csv;
 using std::ceil;
+using std::memcpy;
+using std::sort;
 using std::string;
 
 const double AVAILABLE_TIME = 3.0;
 const double CLEANUP_HOURS = 6.0;
 const double CUTTING_RATE = 110.0;
 
+const int MAX_ROWS = 5;
+const int ROW_SIZE = 10;
 const int MAX_PALLET_NUMBER = 20;
 
 // was really long and didn't wanna type it all the time.
@@ -34,6 +40,12 @@ struct keycodes_wrapper
 struct carton_sizes_wrapper
 {
     int data[MAX_PALLET_NUMBER];
+    int size;
+};
+
+struct rows_array_wrapper
+{
+    int data[MAX_ROWS][ROW_SIZE];
     int size;
 };
 
@@ -147,6 +159,76 @@ int main()
     printf("number of team: %d\n", team_member_number);
     printf("load finish time: %lf\n", finish_time);
     printf("cleanup time: %lf\n", cleanup_time);
+
+    // for the rows, we're going to use cartons_sizes, where each size represents a pallet.
+    // for the second argument, we need a pointer to the end of the data. for this, we use pointer arithmetic.
+    // we can identify where it ends by adding the size on to it.
+    sort(carton_sizes.data, carton_sizes.data + carton_sizes.size, std::greater<int>());
+    rows_array_wrapper rows = {.size = 0};
+
+    int current_row_number = 0; // remove this and replace with j. make sure to increment before break.
+    // need to figure out how to set the size at the end.
+    int values_assigned = 0; // think i can work this out with multiplication (i + 1) * (j + 1)??
+    int temp_row[ROW_SIZE];
+
+    // should realistically never get to this condition,
+    // unless we have an array that is the perfect number of items to perfectly fill each row.
+    // usually the break will catch
+    for (int j = 0; j < MAX_ROWS; j++)
+    {
+        for (int i = 0; i < ROW_SIZE; i++)
+        {
+            // if we've assigned all the values that were stored in
+            if (values_assigned >= carton_sizes.size)
+            {
+                temp_row[i] = 0;
+                continue;
+            }
+
+            temp_row[i] = carton_sizes.data[current_row_number * ROW_SIZE + i];
+            values_assigned += 1;
+        }
+
+        // copy value here
+        // rows.data[current_row_number] = temp_row; basically what we're doing with memcpy
+
+        int move_size = sizeof(int) * ROW_SIZE;                     // could be more efficient by only moving the number of values
+                                                                    // we need, but this works as consistency
+        memcpy(rows.data[current_row_number], temp_row, move_size); // im going to regret doing this
+
+        current_row_number += 1;
+
+        // clear the array
+        for (int k = 0; k < ROW_SIZE; k++)
+        {
+            temp_row[k] = 0;
+        }
+
+        // next for loop here
+        // checking if we need to keep adding rows - if we have exceeded or are equal to teh number of values
+        // we needed to sort into rows, then we're good.
+        if (values_assigned >= carton_sizes.size)
+        {
+            break; // we dont need to do any more.
+        }
+    }
+
+    rows.size = current_row_number;
+
+    // change the way its printed, so its
+    // row 1
+    // row 2
+    // row 3
+    // etc
+    printf("--------------------------------\n");
+    for (int i = 0; i < rows.size; i++)
+    {
+        for (int j = 0; j < ROW_SIZE; j++)
+        {
+            printf("row[%d][%d] = %d\n", i, j, rows.data[i][j]);
+        }
+    }
+    printf("--------------------------------\n");
 
     return 0;
 }
