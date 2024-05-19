@@ -183,7 +183,6 @@ void sort_into_rows(rows_array_wrapper &rows, const carton_sizes_wrapper &carton
  */
 void print_rows(const rows_array_wrapper &rows)
 {
-    printf("FRONT\n");
     printf("--------------------------------\n");
     for (int i = 0; i < rows.size; i++)
     {
@@ -198,9 +197,11 @@ void print_rows(const rows_array_wrapper &rows)
 }
 
 /**
- * @brief 
+ * @brief Handle calculations such as the number of sorters and cutters. Print at the end in a neat format.
+ * In a function to avoid cluttering the main namespace with working variables.
+ * If nothing is being printed, the code is not reaching this function.
  * 
- * @param carton_sizes 
+ * @param carton_sizes A wrapper for the array that holds all carton sizes.
  */
 void handle_calculations(const carton_sizes_wrapper &carton_sizes)
 {

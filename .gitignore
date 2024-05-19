@@ -33,3 +33,5 @@
 
 # vs code file
 /.vscode/
+/.github/
+/.devcontainer/
