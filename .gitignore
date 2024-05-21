@@ -35,3 +35,6 @@
 /.vscode/
 /.github/
 /.devcontainer/
+
+# Dependencies
+/api/node_modules
