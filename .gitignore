@@ -31,10 +31,13 @@
 *.out
 *.app
 
-# vs code file
+# VScode file
 /.vscode/
 /.github/
 /.devcontainer/
 
 # Dependencies
 /api/node_modules
+
+# process.env
+process.env

@@ -1,11 +1,21 @@
 import express from "express";
-import { readFileSync, writeFileSync } from "fs";
+import { readFile, readFileSync, writeFileSync } from "fs";
 import qrcode from "qrcode";
+import { fileURLToPath } from "url";
+import path from "path";
+
+// set up config
+const __filename = fileURLToPath(import.meta.url);
+
+const CONFIG_PATH = path.join(path.dirname(__filename), "..", "..", "config.json");
+const config = JSON.parse(readFileSync(CONFIG_PATH));
+
+const PORT = config.api.port || PORT;
+const CSV_PATH = config.api.path_override.length > 0 ? config.api.path_override : path.join(path.dirname(__filename), "..", "..", "target", "keycodes.csv");
+const IPV4_ADDRESS = process.env.IPV4_ADDRESS;
+const URL_PREFIX = `http://${IPV4_ADDRESS}:${PORT}/pallet?generate=false&keycode=`
 
 const app = express();
-const PORT = 3000;
-const PATH = "C:\\Users\\natey\\Desktop\\programming\\SIT\\102\\decant-tool-gen\\target\\keycodes.csv";
-const URL_PREFIX = "http://10.141.63.141:3000/pallet?generate=false&keycode="
 
 function readCSV(path) {
     return readFileSync(path, 'utf8');
@@ -17,37 +27,40 @@ function saveToCSV(csvString, path, keycodeStr) {
     writeFileSync(path, toWrite);
 }
 
+// default
 app.get('/', (req, res) => {
-    const status = {
-        "status": "running"
-    };
-
-    res.send(status);
+    res.send({
+        status: "running",
+    });
 })
 
 app.get("/pallet", async (req, res) => {
     const queries = req.query;
 
-    console.log(queries);
+    // not what we were looking for
+    if (!queries || !queries.keycode) {
+        res.status(400).send("An error occured!");
+        return;
+    }
 
-    if (!queries || !queries.keycode || !queries.generate) res.status(400).send("bad!");
+    if (queries.keycode.length != 8) {
+        res.status(400).send("An error occured!");
+        return;
+    }
 
-    if (queries.generate == "true") {
+    if (!queries.generate) queries.generate = 'false';
 
+    if (queries.generate == "true") { // if they want a qrcode
         try {
             const qrCodeImage = await qrcode.toDataURL(URL_PREFIX + queries.keycode);
             res.status(200).send(`<img src="${qrCodeImage}" alt="QR Code"/>`);
         } catch (err) {
             res.status(500).send("An error occured!");
         }
-
-    } else if (queries.generate == "false") {
-        const csvString = readCSV(PATH);
-        saveToCSV(csvString, PATH, queries.keycode);
-
+    } else if (queries.generate == "false") { // if they have scanned a qr code
+        saveToCSV(readCSV(CSV_PATH), CSV_PATH, queries.keycode);
         res.status(200).send(`Uploading keycode (${queries.keycode}) complete!`);
-        return;
-    } else {
+    } else { // they provided a value for generate that we werent expecting
         res.status(500).send(`An error occured.`);
     }
 });

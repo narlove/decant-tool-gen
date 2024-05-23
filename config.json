@@ -1,0 +1,18 @@
+{
+    "api": {
+        "path_override": "",
+        "port": 3000
+    },
+    "csv-DONOTUSE": {
+        "keycode_path_override": "",
+        "pallets_path_override": ""  
+    },
+    "tool-DONOTUSE": {
+        "available_time": 3.0,
+        "cleanup_hours": 0.5,
+        "cutting_rate": 110.0,
+        "max_rows": 5,
+        "row_size": 10,
+        "max_pallet_number": 20
+    }
+}
