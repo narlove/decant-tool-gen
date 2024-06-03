@@ -10,7 +10,7 @@ const __filename = fileURLToPath(import.meta.url);
 const CONFIG_PATH = path.join(path.dirname(__filename), "..", "..", "config.json");
 const config = JSON.parse(readFileSync(CONFIG_PATH));
 
-const PORT = config.api.port || PORT;
+const PORT = config.api.port || 3000;
 const CSV_PATH = config.api.path_override.length > 0 ? config.api.path_override : path.join(path.dirname(__filename), "..", "..", "target", "keycodes.csv");
 const IPV4_ADDRESS = process.env.IPV4_ADDRESS;
 const URL_PREFIX = `http://${IPV4_ADDRESS}:${PORT}/pallet?generate=false&keycode=`
